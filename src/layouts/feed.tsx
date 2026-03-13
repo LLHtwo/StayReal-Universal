@@ -8,6 +8,7 @@ import feedFof from "~/stores/feed-fof";
 import me from "~/stores/me";
 import moment from "~/stores/moment"
 import MdiRefresh from "~icons/mdi/refresh";
+import MdiArchive from "~icons/mdi/archive";
 import { promptForPermissions } from "~/utils/permissions";
 import BottomNavigation from "~/components/bottom-navigation";
 import { DropdownMenu } from "@kobalte/core/dropdown-menu";
@@ -28,6 +29,7 @@ const FeedLayout: FlowComponent = (props) => {
   });
 
   const [isRefreshing, setIsRefreshing] = createSignal(false);
+  const [isArchiving, setIsArchiving] = createSignal(false);
 
   const handleRefresh = async () => {
     try {
@@ -64,6 +66,19 @@ const FeedLayout: FlowComponent = (props) => {
     }
     finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    try {
+      setIsArchiving(true);
+      const count = await feed.archiveFeed();
+      toast.success(`Saved ${count} posts`);
+    } catch (error) {
+      console.error("[FeedLayout::handleArchive]:", error);
+      toast.error(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsArchiving(false);
     }
   };
 
@@ -125,19 +140,36 @@ const FeedLayout: FlowComponent = (props) => {
             </DropdownMenu.Portal>
           </DropdownMenu>
 
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isRefreshing()}
-            title="Refresh feed & last moment"
-          >
-            <MdiRefresh
-              class="text-white text-2xl rounded-full p-1"
-              classList={{
-                "animate-spin text-white/50 bg-white/10": isRefreshing(),
-              }}
-            />
-          </button>
+          <div class="flex items-center gap-2">
+            <Show when={view() === "friends"}>
+              <button
+                type="button"
+                onClick={handleArchive}
+                disabled={isArchiving()}
+                title="Archive feed"
+              >
+                <MdiArchive
+                  class="text-white text-2xl rounded-full p-1"
+                  classList={{
+                    "animate-spin text-white/50 bg-white/10": isArchiving(),
+                  }}
+                />
+              </button>
+            </Show>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              disabled={isRefreshing()}
+              title="Refresh feed & last moment"
+            >
+              <MdiRefresh
+                class="text-white text-2xl rounded-full p-1"
+                classList={{
+                  "animate-spin text-white/50 bg-white/10": isRefreshing(),
+                }}
+              />
+            </button>
+          </div>
         </nav>
       </header>
 

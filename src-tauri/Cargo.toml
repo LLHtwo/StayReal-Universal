@@ -24,6 +24,7 @@ tauri-plugin-os = "2"
 tauri-plugin-internal-api = { path = "../internal-api" }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
+tauri-plugin-fs = "2"
 
 [package.metadata.patch]
 crates = ["wry"]

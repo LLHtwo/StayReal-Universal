@@ -8,11 +8,23 @@
   "permissions": [
     "os:default",
     "core:default",
+    "fs:default",
+    "fs:allow-picture-write-recursive",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        { "path": "$DOWNLOAD/**" },
+        { "path": "$PICTURE/**" }
+      ]
+    },
     {
       "identifier": "http:default",
       "allow": [
         {
           "url": "https://*.bereal.com"
+        },
+        {
+          "url": "https://*.bereal.network"
         },
         {
           "url": "https://storage.googleapis.com"
