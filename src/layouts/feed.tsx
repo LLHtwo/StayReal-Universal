@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, on, onMount, Show, type FlowComponent } from "solid-js";
+import { createEffect, createMemo, createSignal, on, onCleanup, onMount, Show, type FlowComponent } from "solid-js";
 import toast from "solid-toast";
 import { ProfileInexistentError } from "~/api/requests/person/me";
 import PullableScreen from "~/components/pullable-screen";
@@ -85,6 +85,25 @@ const FeedLayout: FlowComponent = (props) => {
   onMount(async () => {
     // Ask the user for notification permissions.
     await promptForPermissions();
+  });
+
+  onMount(() => {
+    const runAutoArchive = async () => {
+      try {
+        const count = await feed.archiveFeed();
+        console.log(`Auto-archive: saved ${count} posts`);
+      } catch (error) {
+        console.error("[FeedLayout::auto-archive]:", error);
+      }
+    };
+
+    const initialTimeoutId = setTimeout(runAutoArchive, 30_000);
+    const intervalId = setInterval(runAutoArchive, 60 * 60 * 1000);
+
+    onCleanup(() => {
+      clearTimeout(initialTimeoutId);
+      clearInterval(intervalId);
+    });
   });
 
   createEffect(on(view, async () => {
