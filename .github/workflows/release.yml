@@ -1,9 +1,7 @@
 name: mobile build for distribution
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
   build-mobile:
