@@ -34,6 +34,14 @@ export default createRoot(() => {
     _set("value", null);
   };
 
+  /** Derive file extension from mimeType (e.g. "image/webp" → "webp") or URL path. */
+  const extensionFromMedia = (mimeType: string | undefined, url: string): string => {
+    const fromMime = mimeType?.split("/")[1];
+    if (fromMime) return fromMime;
+    const fromUrl = /\.([a-z0-9]+)(?:\?|$)/i.exec(url)?.[1];
+    return fromUrl ?? "webp";
+  };
+
   const archiveFeed = async (): Promise<number> => {
     const data = await getFeedsFriends();
     const friendsPosts = data.friendsPosts ?? [];
@@ -46,8 +54,10 @@ export default createRoot(() => {
       await mkdir(dir, { ...baseOpt, recursive: true });
       for (const post of overview.posts) {
         let postSaved = false;
-        const primaryPath = `${dir}/${post.id}-primary.jpg`;
-        const secondaryPath = `${dir}/${post.id}-secondary.jpg`;
+        const primaryExt = extensionFromMedia(post.primary.mimeType, post.primary.url);
+        const secondaryExt = extensionFromMedia(post.secondary.mimeType, post.secondary.url);
+        const primaryPath = `${dir}/${post.id}-primary.${primaryExt}`;
+        const secondaryPath = `${dir}/${post.id}-secondary.${secondaryExt}`;
         if (!(await exists(primaryPath, baseOpt))) {
           const res = await tauriFetch(post.primary.url);
           if (!res.ok) throw new Error(`Primary image failed: ${res.status}`);
